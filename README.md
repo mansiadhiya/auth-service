@@ -107,11 +107,25 @@ The Auth Service handles user authentication, JWT token generation/validation, a
 - spring-boot-starter-data-jpa
 - spring-boot-starter-security
 - spring-boot-starter-webmvc
+- spring-boot-starter-actuator
+- spring-boot-devtools
 - mysql-connector-j
 - lombok
+- mapstruct (1.5.5.Final)
 - jjwt-api (0.11.5)
 - jjwt-impl (0.11.5)
 - jjwt-jackson (0.11.5)
+- spring-boot-starter-data-jpa-test (test)
+- spring-boot-starter-security-test (test)
+- spring-boot-starter-webmvc-test (test)
+```
+
+## Build Plugins
+
+```xml
+- maven-compiler-plugin (with Lombok & MapStruct processors)
+- spring-boot-maven-plugin
+- jacoco-maven-plugin (0.8.11) - Code coverage
 ```
 
 ## Environment Variables
@@ -233,6 +247,15 @@ auth-service/
 
 ## Testing Instructions
 
+### Test Classes Available
+- **Service Layer**: AuthServiceTest
+- **Repository Layer**: UserRepositoryTest
+- **DTO Layer**: AuthRequestTest, AuthResponseTest, RegisterRequestTest, JwtUtilTest
+- **Entity Layer**: UserTest, RoleTest
+- **Exception Handling**: GlobalExceptionHandlerTest, ErrorResponseTest
+- **Mapper**: AuthMapperTest
+- **Configuration**: TestSecurityConfig
+
 ### Unit Tests
 Run all unit tests:
 ```bash
@@ -250,12 +273,17 @@ Run integration tests with test database:
 mvn verify
 ```
 
-### Test Coverage
+### Test Coverage (JaCoCo)
 Generate test coverage report:
 ```bash
 mvn clean test jacoco:report
 ```
 View report at: `target/site/jacoco/index.html`
+
+Generate coverage with verify:
+```bash
+mvn clean verify
+```
 
 ### Manual API Testing
 

@@ -2,7 +2,6 @@ package com.company.auth.controller;
 
 import org.springframework.web.bind.annotation.*;
 import com.company.auth.dto.*;
-import com.company.auth.entity.Role;
 import com.company.auth.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -12,16 +11,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService service;
+    private final AuthService authService;
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest req){
-        return service.login(req);
+    public AuthResponse login(@RequestBody AuthRequest loginRequest){
+        return authService.login(loginRequest);
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody RegisterRequest req){
-        return service.register(req);
+    public String register(@RequestBody RegisterRequest registerRequest){
+        return authService.register(registerRequest);
     }
 
 }

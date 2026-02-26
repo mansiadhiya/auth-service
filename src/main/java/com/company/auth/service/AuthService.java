@@ -4,9 +4,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.company.auth.dto.*;
-import com.company.auth.dto.JwtUtil;
 import com.company.auth.entity.Role;
 import com.company.auth.entity.User;
+import com.company.auth.mapper.AuthMapper;
 import com.company.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -14,40 +14,35 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthService {
 
-	private final UserRepository repo;
-	private final PasswordEncoder encoder;
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
+	private final AuthMapper authMapper;
 
-	public AuthResponse login(AuthRequest request) {
-		System.out.println(request.getUsername());
-		User user = repo.findByUsername(request.getUsername())
-				.orElseThrow(() -> new RuntimeException("User not found"));
+	public AuthResponse login(AuthRequest loginRequest) {
+		User foundUser = userRepository.findByUsername(loginRequest.getUsername())
+				.orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-		if (!encoder.matches(request.getPassword(), user.getPassword()))
-			throw new RuntimeException("Invalid password");
+		if (!passwordEncoder.matches(loginRequest.getPassword(), foundUser.getPassword()))
+			throw new IllegalArgumentException("Invalid password");
 
-		String token = jwtUtil.generateToken(user);
+		String jwtToken = jwtUtil.generateToken(foundUser);
 
-		return new AuthResponse(token, user.getRole().name());
+		return new AuthResponse(jwtToken, foundUser.getRole().name());
 	}
 
-	public String register(RegisterRequest req){
+	public String register(RegisterRequest registerRequest){
 
-	    if(repo.findByUsername(req.getUsername()).isPresent())
-	        throw new RuntimeException("User already exists");
+	    if(userRepository.findByUsername(registerRequest.getUsername()).isPresent())
+	        throw new IllegalArgumentException("User already exists");
 
-	    Role role = req.getRole() != null ? req.getRole() : Role.USER;
+	    Role userRole = registerRequest.getRole() != null ? registerRequest.getRole() : Role.USER;
 
-	    // prevent normal users from creating ADMIN
-//	    if(role == Role.ADMIN && !isCurrentUserAdmin())
-//	        throw new RuntimeException("Only ADMIN can create ADMIN users");
+	    User newUser = authMapper.toEntity(registerRequest);
+	    newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+	    newUser.setRole(userRole);
 
-	    User user = new User();
-	    user.setUsername(req.getUsername());
-	    user.setPassword(encoder.encode(req.getPassword()));
-	    user.setRole(role);
-
-	    repo.save(user);
+	    userRepository.save(newUser);
 
 	    return "User registered successfully";
 	}
